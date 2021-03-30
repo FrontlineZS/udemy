@@ -1,0 +1,79 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
+}
+
+import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
+
+shadowJar {
+    mergeServiceFiles()
+    zip64 true
+
+    archiveClassifier = ''
+
+    append 'META-INF/spring.handlers'
+    append 'META-INF/spring.schemas'
+    append 'META-INF/spring.tooling'
+
+    transform(PropertiesFileTransformer) {
+        paths = ['META-INF/spring.factories']
+        mergeStrategy = "append"
+    }
+
+    rootSpec.exclude("*.yml")
+    rootSpec.exclude("logback.xml")
+    rootSpec.exclude("hazelcast.xml")
+}
+build.finalizedBy(shadowJar)
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'pl.assecods.udemy.UdemyApplication'
+    }
+}
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+}
+dependencies {
+    // Internal projects
+
+    // Spring boot
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
+
+    // Spring Cloud
+    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap'
+    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-config'
+
+    implementation group: 'net.javacrumbs.shedlock', name: 'shedlock-spring'
+    implementation group: 'net.javacrumbs.shedlock', name: 'shedlock-provider-hazelcast4'
+
+    // Test
+    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test')
+}
+
+copyResource {
+    doLast {
+        copy {
+            from jar
+            from 'Dockerfile'
+            from 'scripts'
+
+            into releaseDir
+        }
+
+        copy {
+            from('src/main/resources/') {
+                include 'application.yml'
+                include 'hazelcast.xml'
+                include 'logback.xml'
+            }
+
+            into configDir
+        }
+    }
+}
