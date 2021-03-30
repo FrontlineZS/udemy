@@ -1,0 +1,9 @@
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <logger name="pl.assecods.socrates" level="DEBUG">
+    </logger>
+    <logger name="pl.assecods.arystoteles" level="DEBUG">
+    </logger>
+
+</configuration>

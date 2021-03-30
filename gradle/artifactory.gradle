@@ -1,0 +1,56 @@
+apply plugin: 'java'
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.artifactory'
+
+def artifactoryUrl = 'https://artifactory.assecods.pl/artifactory/'
+def artifactorySnapshotRepoKey = 'socrates-2.0-snapshot-local'
+def artifactoryReleaseRepoKey = 'socrates-2.0-release-local'
+def artifactoryRepoKey = gradle.startParameter.taskNames.contains('final') ? artifactoryReleaseRepoKey : artifactorySnapshotRepoKey
+def artifactoryUsername = "${artifactoryUsername}".isEmpty() ? System.getenv("ARTIFACTORY_USERNAME") : "${artifactoryUsername}"
+def artifactoryPassword = "${artifactoryPassword}".isEmpty() ? System.getenv("ARTIFACTORY_PASSWORD") : "${artifactoryPassword}"
+
+task sourcesJar(type: Jar, dependsOn: assemble) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifactory {
+    contextUrl = "${artifactoryUrl}"
+    publish {
+        repository {
+            repoKey = "${artifactoryRepoKey}"
+            username = artifactoryUsername
+            password = artifactoryPassword
+            maven = true
+        }
+
+        defaults {
+            publications('mavenJava')
+            publishArtifacts = true
+        }
+    }
+
+    resolve {
+        repository {
+            repoKey = "${artifactoryRepoKey}"
+            username = artifactoryUsername
+            password = artifactoryPassword
+            maven = true
+        }
+    }
+
+    clientConfig.info.setBuildName("udemy - ${project.name}")
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+
+            groupId "${rootProject.group}"
+            artifactId "${project.name}"
+        }
+    }
+}

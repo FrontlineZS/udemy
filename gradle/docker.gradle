@@ -1,0 +1,22 @@
+task releaseDockerZip(type: Zip) {
+    from releaseDir
+    include '*'
+    include '**/*' //to include contents of a folder present inside Reports directory
+    exclude '**/*.zip'
+
+    archiveName project.name + '-' + project.version + '.zip'
+    destinationDir(file("${releaseDir}"))
+}
+
+subprojects {
+    pr -> releaseDockerZip.dependsOn("${pr.path}:copyResource")
+}
+
+releaseDockerZip.doFirst {
+    copy {
+        from('src/main/resources/') {
+            include 'bootstrap.yml'
+        }
+        into configDir
+    }
+}

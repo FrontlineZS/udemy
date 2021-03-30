@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5435/udemy
+    username: postgres
+    password: 12345678
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
+        hbm2ddl:
+          auto: update
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: udemy
+        format_sql: false
+      show-sql: true
+    # Target database to operate on, auto-detected by default. Can be alternatively set using the "databasePlatform" property
+    database: default
+    # Name of the target database to operate on, auto-detected by default. Can be alternatively set using the "Database" enum
+    database-platform: org.hibernate.dialect.H2Dialect
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create-drop
+
+logging:
+  # Log file name
+  file:
+    name:
+
+# Hazelcast
+hazelcast:
+  config:
+    file: file:config/hazelcast.xml
